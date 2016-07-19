@@ -25,13 +25,14 @@ public class ArticleTidy {
 
     /**
      * 载入文章
-     * @param article
+     * @param url
      */
     public static ArticleEntity loadArticle(String url)
     {
-        url = Const.INFOQ_HOST + url;
-        String html = HttpRequest.get(url).body();
-        return tidy(html);
+        String html = HttpRequest.get(Const.INFOQ_HOST + url).body();
+        ArticleEntity arti = tidy(html);
+        arti.setOriginalUrl(url);
+        return arti;
     }
     /**
      * 过滤内容
@@ -42,7 +43,6 @@ public class ArticleTidy {
         Document doc = Jsoup.parse(html);
 
         ArticleEntity arti = new ArticleEntity();
-
         Element header = doc.head();
         arti.setTitle(header.getElementsByTag("title").first().text());
         Elements metas = header.getElementsByTag("meta");
@@ -58,9 +58,11 @@ public class ArticleTidy {
         Element contentElem = doc.body().select(".text_content_container > .text_info").first();
         // 删除script标签
         contentElem.getElementsByTag("script").remove();
+        contentElem.select(".related_sponsors").remove();
+
 
         // 找到div.clear的标签，并把之后出现的元素都删除掉
-        int foundIndex = contentElem.select("div.clear").first().elementSiblingIndex();
+        int foundIndex = contentElem.select(".random_links").first().previousElementSibling().elementSiblingIndex();
         int totalSize = contentElem.children().size();
         for (int i = totalSize - 1; i >= foundIndex; i--) {
             Element elem = contentElem.child(i);
@@ -93,6 +95,7 @@ public class ArticleTidy {
         }
 
         arti.setContent(contentElem.html());
+        System.out.println(contentElem.html());
         return arti;
     }
 }

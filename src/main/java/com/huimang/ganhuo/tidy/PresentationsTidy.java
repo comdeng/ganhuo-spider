@@ -1,13 +1,14 @@
 package com.huimang.ganhuo.tidy;
 
 import com.huimang.ganhuo.entity.ArticleEntity;
+import com.huimang.ganhuo.util.Mysql;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.io.IOException;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,28 +20,48 @@ import java.util.List;
  * @copyright 2016 (c) huimang.com
  * @since 2016/7/17 11:46
  */
-public class PresentationsTidy {
-    /**
-     * 过滤内容
-     *
-     * @param file
-     * @return
-     */
-    public static List<ArticleEntity> tidy(File file) {
-        Document doc = null;
-        try {
-            doc = Jsoup.parse(file, "utf-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        List<ArticleEntity> list = new ArrayList<ArticleEntity>();
+public class PresentationsTidy extends BaseTidy {
+    public String urlExt = "/cn/presentations/";
+    public int pageSize = 12;
+    public int artiType = ArticleEntity.TYPE_PRESENTATION;
+    public String selector = "#content .news_type_video";
 
-        Elements links = doc.getElementById("content").select(".news_type_video");
+    @Override
+    public String getUrlExt() {
+        return this.urlExt;
+    }
+
+    @Override
+    public int getPageSize() {
+        return this.pageSize;
+    }
+
+    @Override
+    public int getArtiType() {
+        return this.artiType;
+    }
+
+    @Override
+    public String getSelector() {
+        return this.selector;
+    }
+
+    /**
+     * 载入文章列表，写入数据库
+     *
+     * @param page
+     */
+    public void loadLists(int page) throws SQLException {
+        String html = getListPage(page);
+        Document doc = Jsoup.parse(html);
+
+        Elements links = doc.select(this.getSelector());
+        List<ArticleEntity> list = new ArrayList<ArticleEntity>();
         for (int i = 0, l = links.size(); i < l; i++) {
             Element movie = links.get(i);
             ArticleEntity arti = new ArticleEntity(ArticleEntity.TYPE_PRESENTATION);
             Element link = movie.select(">a").first();
-            arti.setUrl(link.attr("href"));
+            arti.setOriginalUrl(link.attr("href"));
             arti.setTitle(link.attr("title"));
 
             arti.setCover(movie.select(".movie img").first().attr("src"));
@@ -49,9 +70,19 @@ public class PresentationsTidy {
             Elements authorLinks = author.getElementsByTag("a");
             if (authorLinks.size() == 1) {
                 arti.setAuthor(authorLinks.first().html());
-            } else if(authorLinks.size() > 1) {
+            } else if (authorLinks.size() == 2) {
+                // 是否有评论
+                if (authorLinks.get(1).select(".comments_counts").size() > 0) {
+                    arti.setAuthor(authorLinks.first().html());
+                    arti.setCommentNum(Integer.valueOf(authorLinks.get(1).text()));
+                } else {
+                    arti.setAuthor(authorLinks.first().html());
+                    arti.setTranslator(authorLinks.get(1).html());
+                }
+            } else if (authorLinks.size() == 3) {
                 arti.setAuthor(authorLinks.first().html());
-                arti.setTranslator(authorLinks.get(i).html());
+                arti.setTranslator(authorLinks.get(1).html());
+                arti.setCommentNum(Integer.valueOf(authorLinks.get(2).text()));
             }
 
             String text = author.text().trim();
@@ -67,9 +98,17 @@ public class PresentationsTidy {
                 }
             }
             arti.setSummary(movie.getElementsByTag("p").first().html());
-
             list.add(arti);
         }
-        return list;
+
+        Connection conn = Mysql.getConnection();
+        for (ArticleEntity arti : list) {
+            if (this.isArtiExisted(conn, arti.getOriginalId())) {
+                this.logger.info("arti existed:" + arti.getOriginalUrl());
+                continue;
+            }
+            System.out.print(arti.getTranslator());
+            this.writeArticle(conn, arti);
+        }
     }
 }

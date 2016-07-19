@@ -1,8 +1,11 @@
 package com.huimang.ganhuo.util;
 
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * @author ronnie
@@ -10,12 +13,14 @@ import java.sql.SQLException;
  * @since 2016/7/19 8:11
  */
 public class Mysql {
+    private static Connection connection;
     public static Connection getConnection() {
-        String url = "jdbc:mysql://192.168.56.101:3306/ganhuo?useUnicode=true&amp;characterEncoding=UTF-8";
+        if (connection != null) {
+            return connection;
+        }
         try {
-            Connection conn = DriverManager.getConnection(url, "root", "huimang");
-            return conn;
-        } catch (SQLException e) {
+            return connection = DriverManager.getConnection(Const.getProperty("url"), Const.getProperty("user"), Const.getProperty("pass"));
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;

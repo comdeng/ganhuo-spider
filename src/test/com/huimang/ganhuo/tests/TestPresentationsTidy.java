@@ -1,7 +1,10 @@
+package com.huimang.ganhuo.tests;
+
 import com.huimang.ganhuo.entity.ArticleEntity;
 import com.huimang.ganhuo.tidy.PresentationsTidy;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -11,8 +14,11 @@ import java.util.List;
  */
 public class TestPresentationsTidy {
     public static void main(String[] args) {
-        String path = System.getProperty("user.dir") + "/src/main/resources/presentations.html";
-        List<ArticleEntity> list = PresentationsTidy.tidy(new File(path));
-        System.out.print(list.size());
+        PresentationsTidy tidy = new PresentationsTidy();
+        try {
+            tidy.loadLists(2);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

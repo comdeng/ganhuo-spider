@@ -1,6 +1,7 @@
 package com.huimang.ganhuo.entity;
 
 import java.util.Date;
+import java.util.zip.CRC32;
 
 /**
  * 文章
@@ -22,12 +23,20 @@ public class ArticleEntity {
         this.title = title;
     }
 
-    public String getUrl() {
-        return url;
+    public String getOriginalUrl() {
+        return originalUrl;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
+    public void setOriginalUrl(String originalUrl) {
+        this.originalUrl = originalUrl;
+        this.originalId = getOriginId(originalUrl);
+    }
+
+    public static long getOriginId(String url)
+    {
+        CRC32 crc32 = new CRC32();
+        crc32.update(url.getBytes());
+        return crc32.getValue();
     }
 
     public String[] getKeywords() {
@@ -88,14 +97,30 @@ public class ArticleEntity {
 
     private int type;
     private String title;
-    private String url;
+    private String originalUrl;
     private String[] keywords;
-    private String summary;
-    private String content;
-    private String author;
-    private String translator;
+    private String summary = "";
+    private String content = "";
+    private String author = "";
+    private String translator = "";
     private Date publishDay;
-    private String cover;
+    private String cover = "";
+
+    public long getOriginalId() {
+        return originalId;
+    }
+
+    private long originalId;
+
+    public int getCommentNum() {
+        return commentNum;
+    }
+
+    public void setCommentNum(int commentNum) {
+        this.commentNum = commentNum;
+    }
+
+    private int commentNum = 0;
 
     public String getCover() {
         return cover;

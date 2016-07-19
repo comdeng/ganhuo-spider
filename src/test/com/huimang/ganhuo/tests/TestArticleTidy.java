@@ -1,3 +1,5 @@
+package com.huimang.ganhuo.tests;
+
 import com.huimang.ganhuo.entity.ArticleEntity;
 import com.huimang.ganhuo.tidy.ArticleTidy;
 
@@ -10,7 +12,7 @@ import java.io.File;
  */
 public class TestArticleTidy {
     public static void main(String[] args) {
-        String url = "/news/2016/07/apple-safari-flash-blocked";
+        String url = "/cn/articles/top-10-performance-mistakes";
         ArticleEntity article = ArticleTidy.loadArticle(url);
         System.out.print(article.getAuthor());
     }
