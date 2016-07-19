@@ -55,7 +55,7 @@ public abstract class BaseTidy {
             Element link = block.select(">h2>a").first();
             arti.setOriginalUrl(link.attr("href"));
 
-            Elements pics = block.select(">p>a>img");
+            Elements pics = block.select("img");
             if (pics.size() > 0) {
                 arti.setCover(pics.first().attr("src"));
             }
