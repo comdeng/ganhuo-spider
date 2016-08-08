@@ -12,8 +12,8 @@ import java.io.File;
  */
 public class TestArticleTidy {
     public static void main(String[] args) {
-        String url = "/cn/articles/top-10-performance-mistakes";
+        String url = "/cn/articles/let-react-components-become-responsive";
         ArticleEntity article = ArticleTidy.loadArticle(url);
-        System.out.print(article.getAuthor());
+        System.out.print(article.getContent());
     }
 }

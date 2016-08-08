@@ -103,7 +103,7 @@ public class PresentationsTidy extends BaseTidy {
 
         Connection conn = Mysql.getConnection();
         for (ArticleEntity arti : list) {
-            if (this.isArtiExisted(conn, arti.getOriginalId())) {
+            if (ArticleTidy.isArtiExisted(conn, arti.getOriginalId())) {
                 this.logger.info("arti existed:" + arti.getOriginalUrl());
                 continue;
             }

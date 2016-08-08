@@ -12,7 +12,6 @@ import org.jsoup.select.Elements;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,32 +86,7 @@ public abstract class BaseTidy {
         return html;
     }
 
-    /**
-     * 检查文章是否存在
-     * @param conn
-     * @param originalId
-     * @return
-     */
-    public boolean isArtiExisted(Connection conn, long originalId) {
-        // 检查是否已经存在对应的文章
-        String sql = "select 1 from article where original_id=" + originalId;
-        try {
-            PreparedStatement stmt = conn.prepareStatement(sql);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next() && rs.getInt(1) == 1) {
-                rs.close();
-                stmt.close();
-                return true;
-            } else {
-                rs.close();
-                stmt.close();
-                return false;
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-        return false;
-    }
+
 
     /**
      * 载入文章列表，写入数据库
@@ -129,7 +103,7 @@ public abstract class BaseTidy {
         for (ArticleEntity _arti:list) {
             long originalId = _arti.getOriginalId();
 
-            if (this.isArtiExisted(conn, originalId)) {
+            if (ArticleTidy.isArtiExisted(conn, originalId)) {
                 this.logger.info("article existed:" + _arti.getOriginalUrl());
                 continue;
             }
