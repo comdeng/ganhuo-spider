@@ -2,3 +2,5 @@
 /target/
 /out/
 /lib/
+.DS_Store
+/output/

@@ -126,7 +126,7 @@ public class ArticleTidy {
 
         // 查找作者
         Element extraElem = doc.body().select(".author_general").first();
-        Elements authorElems = extraElem.getElementsByTag("a");
+        Elements authorElems = extraElem.select("a.editorlink");
         int authorSize = authorElems.size();
         if (authorSize == 1) {
             arti.setAuthor(authorElems.first().html());
